@@ -1,4 +1,4 @@
-#include "../Include/App.hpp"
+﻿#include "../Include/App.hpp"
 
 bool Rect2i::Contains(const def::Vector2i& p)
 {
@@ -28,8 +28,8 @@ bool App::OnUserCreate()
     m_CellSize = { cellSize, cellSize };
 
     // Load flag and mine sprites
-    m_FlagImage.Load("./Sandbox/Assets/flag.png");
-    m_MineImage.Load("./Sandbox/Assets/mine.png");
+    m_FlagImage.Load("Assets/flag.png");
+    m_MineImage.Load("Assets/mine.png");
 
     // Construct the game class and the AI
     m_Game = std::make_unique<Minesweeper>(config::BOARD_SIZE, config::MINES_COUNT);
@@ -110,8 +110,6 @@ bool App::OnUserUpdate(float deltaTime)
         aiButtonRect.size
     };
 
-    bool won = m_Game->Won();
-
     // Place a flag on the board on the right mouse button click
     if (inp->GetButtonState(def::Button::RIGHT).released)
     {
@@ -139,20 +137,20 @@ bool App::OnUserUpdate(float deltaTime)
         {
             // Trying to make a safe move
             if (move = m_AI->MakeSafeMove())
-                printf("AI makes a safe move\n");
+                std::cout << "AI makes a safe move: " << move->ToString() << std::endl;
 
             // Making a random move
             else
             {
                 if (move = m_AI->MakeRandomMove())
-                    printf("No known safe moves, making random move\n");
+                    std::cout << "No known safe moves, making random move: " << move->ToString() << std::endl;
                 else
-                    printf("No moves left to make\n");
+                    std::cout << "No moves left to make" << std::endl;
             }
 
             // Updating flags in the game based on the AI knowledge
             for (const auto& mine : m_AI->GetKnownMines())
-                m_Game->GetCell(mine).isMine = true;
+                m_Game->GetCell(mine).isFlagged = true;
         }
 
         // Reset the game state
@@ -195,6 +193,8 @@ bool App::OnUserUpdate(float deltaTime)
         }
     }
 
+    bool won = !m_Lost && m_Game->Won();
+
     Clear(def::BLACK);
 
     // Draw the board
@@ -212,7 +212,7 @@ bool App::OnUserUpdate(float deltaTime)
             const Cell& cell = m_Game->GetCell(c);
 
             // Draw either a mine if we lost the game or a flag or a number
-            if (m_Lost && cell.isMine)
+            if (m_Lost && cell.isMine && !cell.isFlagged)
                 DrawWithinCell(cellPos, m_MineImage);
             else if (cell.isFlagged)
                 DrawWithinCell(cellPos, m_FlagImage);

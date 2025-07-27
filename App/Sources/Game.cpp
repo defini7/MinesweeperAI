@@ -1,6 +1,6 @@
-#include "../Include/Game.hpp"
+﻿#include "../Include/Game.hpp"
 
-Minesweeper::Minesweeper(const def::Vector2i &boardSize, int minesCount)
+Minesweeper::Minesweeper(const def::Vector2i& boardSize, int minesCount)
     : m_BoardSize(boardSize), m_MinesCount(minesCount)
 {
     // Creating the board
@@ -8,17 +8,13 @@ Minesweeper::Minesweeper(const def::Vector2i &boardSize, int minesCount)
 
     // Populating the board with mines
 
-    using IntDist = std::uniform_int_distribution<>;
-    
-    std::mt19937 mt(time(nullptr));
-    IntDist widthRange(0, boardSize.x - 1);
-    IntDist heightRange(0, boardSize.y - 1);
+    srand(time(nullptr));
 
     size_t minesCreated = 0;
     while (minesCreated != minesCount)
     {
-        int x = widthRange(mt);
-        int y = heightRange(mt);
+        int x = rand() % boardSize.x;
+        int y = rand() % boardSize.y;
 
         int i = y * boardSize.x + x;
 
@@ -39,7 +35,7 @@ Minesweeper::Minesweeper(const def::Vector2i &boardSize, int minesCount)
 
 Minesweeper::~Minesweeper()
 {
-    delete m_Board;
+    delete[] m_Board;
 }
 
 Cell& Minesweeper::GetCell(const def::Vector2i& cell)
@@ -55,16 +51,19 @@ const Cell& Minesweeper::GetCell(const def::Vector2i& cell) const
 bool Minesweeper::Won() const
 {
     int boardSize = m_BoardSize.x * m_BoardSize.y;
-    int revealedCount = 0;
+    int minesIdentified = 0, revealed = 0;
 
     for (int i = 0; i < boardSize; i++)
     {
         // If the cell is a mine and it's flagged
         if (m_Board[i].isMine && m_Board[i].isFlagged)
-            revealedCount++;
+            minesIdentified++;
+
+        if (m_Board[i].isRevealed || m_Board[i].isFlagged)
+            revealed++;
     }
 
-    return revealedCount == m_MinesCount;
+    return minesIdentified == m_MinesCount && revealed == boardSize;
 }
     
 int Minesweeper::CountNearbyMines(const def::Vector2i& cell) const

@@ -1,12 +1,47 @@
-#pragma once
+﻿#pragma once
 
 #include "Vector2D.hpp"
 #include "Game.hpp"
+
+#include <unordered_set>
+
+namespace std
+{
+    template <>
+    struct hash<def::Vector2i>
+    {
+        size_t operator()(const def::Vector2i& v) const
+        {
+            size_t h1 = std::hash<int>{}(v.x);
+            size_t h2 = std::hash<int>{}(v.y);
+
+            std::size_t mult = 0x345678UL;
+
+            std::size_t combined = 0x345678UL;
+            combined = (combined ^ h1) * mult;
+            combined = (combined ^ h2) * mult;
+
+            return combined + 97531;
+        }
+    };
+}
 
 template <class T>
 bool Vector_Contains(const std::vector<T>& vector, const T& value)
 {
     return std::ranges::find(vector, value) != vector.end();
+}
+
+template <class T>
+bool UnorderedSet_IsSubset(const std::unordered_set<T>& set, const std::unordered_set<T>& subset)
+{
+    for (const auto& v : subset)
+    {
+        if (!set.contains(v))
+            return false;
+    }
+
+    return true;
 }
 
 /*
@@ -16,17 +51,17 @@ and a count of the number of those cells which are mines.
 */
 struct Sentence
 {
-    Sentence(const std::vector<def::Vector2i> cells, int minesCount);
+    Sentence(const std::unordered_set<def::Vector2i> cells, int minesCount);
 
     bool operator==(const Sentence& other) const;
 
-    std::vector<def::Vector2i> GetKnownMines() const;
-    std::vector<def::Vector2i> GetKnownSafes() const;
+    std::unordered_set<def::Vector2i> GetKnownMines() const;
+    std::unordered_set<def::Vector2i> GetKnownSafes() const;
 
     void MarkMine(const def::Vector2i& cell);
     void MarkSafe(const def::Vector2i& cell);
 
-    std::vector<def::Vector2i> cells;
+    std::unordered_set<def::Vector2i> cells;
     int minesCount;
 };
 
@@ -75,7 +110,7 @@ public:
     Returns all cells that are known to be mines
     based on the current knowledge.
     */
-    const std::vector<def::Vector2i>& GetKnownMines() const;
+    const std::unordered_set<def::Vector2i>& GetKnownMines() const;
 
 private:
     void MarkCells();
@@ -83,9 +118,9 @@ private:
 private:
     def::Vector2i m_BoardSize;
 
-    std::vector<def::Vector2i> m_Moves;
-    std::vector<def::Vector2i> m_Safes;
-    std::vector<def::Vector2i> m_Mines;
+    std::unordered_set<def::Vector2i> m_Moves;
+    std::unordered_set<def::Vector2i> m_Safes;
+    std::unordered_set<def::Vector2i> m_Mines;
 
     std::vector<Sentence> m_Knowledge;
 
