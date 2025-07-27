@@ -28,8 +28,8 @@ bool App::OnUserCreate()
     m_CellSize = { cellSize, cellSize };
 
     // Load flag and mine sprites
-    m_FlagImage.Load("Assets/flag.png");
-    m_MineImage.Load("Assets/mine.png");
+    m_FlagImage.Load("../../App/Assets/flag.png");
+    m_MineImage.Load("../../App/Assets/mine.png");
 
     // Construct the game class and the AI
     m_Game = std::make_unique<Minesweeper>(config::BOARD_SIZE, config::MINES_COUNT);
